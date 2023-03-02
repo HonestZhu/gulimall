@@ -6,12 +6,26 @@ spring:
     password: root
   application:
     name: gulimall-product
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alicloud:
+      access-key: LTAI5tAXQ1BtXw57Y9ngRUDx
+      secret-key: 1RkoqsHXkXAhs53s4ed9gFWBT5j1bZ
+      oss:
+        endpoint: oss-cn-chengdu.aliyuncs.com
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
     db-config:
       id-type: auto
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
 
 server:
   port: 12000
+  error:
+    include-binding-errors: always
