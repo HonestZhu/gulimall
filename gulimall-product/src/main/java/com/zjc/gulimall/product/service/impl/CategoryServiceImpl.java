@@ -1,12 +1,11 @@
 package com.zjc.gulimall.product.service.impl;
 
+import com.zjc.gulimall.product.dao.CategoryBrandRelationDao;
+import com.zjc.gulimall.product.service.CategoryBrandRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,10 +17,14 @@ import com.zjc.common.utils.Query;
 import com.zjc.gulimall.product.dao.CategoryDao;
 import com.zjc.gulimall.product.entity.CategoryEntity;
 import com.zjc.gulimall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
+
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -51,6 +54,30 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void removeMenuByIds(List<Long> asList) {
         // TODO
         baseMapper.deleteBatchIds(asList);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        return this.findParentPath(catelogId, paths).toArray(new Long[0]);
+    }
+
+    @Override
+    @Transactional
+    public void updateCascade(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+    }
+
+    private List<Long> findParentPath(Long catelogId, List<Long> paths) {
+
+        CategoryEntity byId = this.getById(catelogId);
+        if(byId.getParentCid() != 0) {
+            findParentPath(byId.getParentCid(), paths);
+        }
+        paths.add(catelogId);
+
+        return paths;
     }
 
     // 递归搜索所有子菜单

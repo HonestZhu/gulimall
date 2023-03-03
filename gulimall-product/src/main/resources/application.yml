@@ -29,3 +29,4 @@ server:
   port: 12000
   error:
     include-binding-errors: always
+debug: true
